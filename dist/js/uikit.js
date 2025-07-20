@@ -2380,7 +2380,13 @@
       methods: {
         apply(el) {
           const prevState = this.getState();
-          const newState = mergeState(el, this.attrItem, this.getState());
+          let newState;
+          if (hasClass(el, this.cls)) {
+            removeClass(el, this.cls);
+            newState = this.getState();
+          } else {
+            newState = mergeState(el, this.attrItem, this.getState());
+          }
           if (!isEqualState(prevState, newState)) {
             this.setState(newState);
           }
@@ -6469,11 +6475,13 @@
               this.fail(this.t("invalidSize", this.maxSize));
               return;
             }
-            if (this.allow && !match$1(this.allow, file.name)) {
+            const filenameMatchesPatterns = !this.allow || this.allow.split(/[,; ]/).map((pattern) => match$1(pattern, file.name)).some((e) => e != null);
+            if (!filenameMatchesPatterns) {
               this.fail(this.t("invalidName", this.allow));
               return;
             }
-            if (this.mime && !match$1(this.mime, file.type)) {
+            const mimetypeMatchesPatterns = !this.mime || this.mime.split(/[,; ]/).map((pattern) => match$1(pattern, file.type)).some((e) => e != null);
+            if (!mimetypeMatchesPatterns) {
               this.fail(this.t("invalidMime", this.mime));
               return;
             }
